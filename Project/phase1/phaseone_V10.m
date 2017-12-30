@@ -384,16 +384,20 @@ spectrogram_group9(downsampled2, fs_generated, length(downsampled2)/fs_generated
 spectrogram_group9(downsampled3, fs_generated, length(downsampled3)/fs_generated);
 spectrogram_group9(downsampled6, fs_generated, length(downsampled6)/fs_generated);
 
-figure, 
-subplot (1,3,1)
+figure,
+subplot (2,2,1)
+stem(input_sig);
+ylabel('magnitude')
+xlabel('samples')
+subplot (2,2,2)
 stem(downsampled2);
 ylabel('magnitude')
 xlabel('samples')
-subplot (1,3,2)
+subplot (2,2,3)
 stem(downsampled3);
 ylabel('magnitude')
 xlabel('samples')
-subplot (1,3,3)
+subplot (2,2,4)
 stem(downsampled6);
 ylabel('magnitude')
 xlabel('samples')
@@ -407,16 +411,20 @@ spectrogram_group9(decimated2, fs_generated, length(decimated2)/fs_generated);
 spectrogram_group9(decimated3, fs_generated, length(decimated3)/fs_generated);
 spectrogram_group9(decimated6, fs_generated, length(decimated6)/fs_generated);
 
-figure, 
-subplot (1,3,1)
+figure,
+subplot (2,2,1)
+stem(input_sig);
+ylabel('magnitude')
+xlabel('samples')
+subplot (2,2,2)
 stem(decimated2);
 ylabel('magnitude')
 xlabel('samples')
-subplot (1,3,2)
+subplot (2,2,3)
 stem(decimated3);
 ylabel('magnitude')
 xlabel('samples')
-subplot (1,3,3)
+subplot (2,2,4)
 stem(decimated6);
 ylabel('magnitude')
 xlabel('samples')

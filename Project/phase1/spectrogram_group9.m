@@ -104,7 +104,8 @@ freq=freq';
         signal_kesit=window_type'.*input_sig((1+(N_spec-overlap)*(i-1)):((N_spec+(N_spec-overlap)*(i-1))));
         Y = fft(signal_kesit);
         P2 = abs(Y);
-        P2=10.*log10(abs(Y/L).^2); %normalization
+        %P2=10.*log10(abs(Y/L).^2); %normalization
+        P2=10.*log10(abs(Y).^2);  % NOT normalized
         P1 = P2(1:L/2+1);
         P1(2:end-1) = 2*P1(2:end-1);
         Den(:,i)=P1;
@@ -118,9 +119,9 @@ max_den=max(Den(:));
 
 %Den(Den<0.1) = 0;
 
-clims=[(-20) max_den] ;
+clims=[min_den max_den] ;
 %im=imagesc(x,y,10*log10(Den.^2),clims);
-im=imagesc(x,y,Den);
+im=imagesc(x,y,Den,clims);
 xlabel('time(s)');
 ylabel('freq(Hz)');
 colorbar;

@@ -1,7 +1,7 @@
 clear all
 close all
 
-prompt='Do you want to analyze a 0)Recorded sound 1)Sound data from a file 2)Generated data ?';
+prompt='Do you want to analyze a \n0)Recorded sound \n1)Sound data from a file \n2)Generated data ?';
 choice = input(prompt);
 %% Sound input from microphone
 if (choice==0)
@@ -372,6 +372,9 @@ end
 % xlabel('time(s)');
 % ylabel('freq(Hz)');
 % colorbar;
+%% Input signal spectrogram
+
+spectrogram_group9(input_sig, fs_generated, length(input_sig)/fs_generated);
 
 %% Phase 2 - 1st Part - Reducing the number of time samples
 
@@ -433,10 +436,20 @@ suptitle('Decimated input signals by 2,3 and 6 respectively')
 % Fractional downsampling factors
 
 downsampled25=upsample(input_sig, 2);
-downsampled25=downsample(input_sig, 15);
+for i=1:441000
+    for j=1:2
+        downsampled25((i-1)*5+j)=downsampled25(i)-j*(downsampled25(i)-downsampled25(i+1))/5;
+    end
+end
+downsampled25=downsample(downsampled25, 5);
 
 decimated25=upsample(input_sig, 2);
-decimated25=decimate(input_sig, 15);
+for i=1:441000
+    for j=1:2
+        decimated25((i-1)*2+j)=decimated25(i);
+    end
+end
+decimated25=decimate(decimated25, 5);
 
 spectrogram_group9(downsampled25, fs_generated, length(downsampled25)/fs_generated);
 

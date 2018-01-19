@@ -1,4 +1,8 @@
 %phase 2-3
+t=0:0.00002083:5;
+input_sig=100*sin(2*pi*2.*t);
+
+
 
 %% 8-bit quantization
 

@@ -273,7 +273,7 @@ partition_amount=1000;
 
 % Using DFT (Partition the input signal and apply quantization to frequency domain coefficients)
 N_blocksize=floor(length(input_sig)/partition_amount); % block size to be used in DFT
-compression_amount=9900*N_blocksize/10000;
+compression_amount=9000*N_blocksize/10000;
 
 input_sig_buffered=buffer(input_sig ,N_blocksize); % Partition the signal
 
@@ -303,6 +303,7 @@ input_sig_avg_pwr=mean(input_sig.^2);
 
 
 input_sig_thresholded=input_sig_thresholded';
+avg_pwr_input_sig_thresholded=mean(input_sig_thresholded.^2);
 
 %% Figure plots FFT
 
@@ -352,7 +353,7 @@ partition_amount_dct=1000;
 
 % Using DCT (Partition the input signal and apply quantization to frequency domain coefficients)
 N_blocksize_dct=floor(length(input_sig)/partition_amount_dct); % block size to be used in DCT
-compression_amount=9900*N_blocksize_dct/10000;
+compression_amount=9000*N_blocksize_dct/10000;
 % dct
 input_sig_buffered=buffer(input_sig ,N_blocksize_dct); % Partition the signal
 % audioread
@@ -371,8 +372,8 @@ input_sig_buffered_thresholded=idct(input_sig_buffered_dct,[],1,'Type',2);
 input_sig_thresholded=input_sig_buffered_thresholded(:); % obtain a vector from buffered & thresholded matrix
 
 % Error signal computation
-input_sig_thresholded=input_sig_thresholded(1:length(input_sig));
-err_dft_comp=input_sig-input_sig_thresholded';
+input_sig_thresholded_dct=input_sig_thresholded(1:length(input_sig));
+err_dft_comp=input_sig-input_sig_thresholded_dct';
 
 % Average power computation
 err_avg_pwr=err_dft_comp.^2;
@@ -380,8 +381,8 @@ err_avg_pwr=mean(err_avg_pwr);
 err_tot_pwr=sum(err_dft_comp.^2);
 input_sig_avg_pwr=mean(input_sig.^2);
 
-input_sig_thresholded=input_sig_thresholded';
-
+input_sig_thresholded_dct=input_sig_thresholded_dct';
+avr_pwr_input_sig_thresholded_dct=mean(input_sig_thresholded_dct.^2)
 %% Figure plots FFT
 
 % err signal

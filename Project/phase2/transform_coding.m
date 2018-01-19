@@ -251,6 +251,7 @@ if(choice==2)
 
         input_sig=input_sig;
     end
+N=N_signal;    
 end
 
 %% Input signal spectrogram
@@ -258,25 +259,35 @@ end
 spectrogram_group9(input_sig, fs_generated, length(input_sig)/fs_generated);
 
 %% Coding (Supply desired number of nonzero coefficients)
-
 %Sort absolute values of the coefficients and then determine the
 %corresponding threshold automatically for each input audio signal
 
 %Listen, comment on quality, plot spectrogram of input and output, compute error signal, average error 
 partition_amount=1000;
-compression_amount=5*N/10;
 
 % Sorting coeffs with respect to absolute values
-sorted_input_sig_fft=sort(abs(fft(input_sig)));
+% sorted_input_sig_fft=sort(abs(fft(input_sig)));
 % Selecting threshold value (Decides on compression amount) (ascending order sorted so value represents the amount of eliminated elements)
-threshold=sorted_input_sig_fft(ceil(compression_amount));
-max_sorted_input=max(sorted_input_sig_fft);
+% threshold=sorted_input_sig_fft(ceil(compression_amount));
+% max_sorted_input=max(sorted_input_sig_fft);
 
 % Using DFT (Partition the input signal and apply quantization to frequency domain coefficients)
 N_blocksize=floor(length(input_sig)/partition_amount); % block size to be used in DFT
+compression_amount=9900*N_blocksize/10000;
+
 input_sig_buffered=buffer(input_sig ,N_blocksize); % Partition the signal
+
 input_sig_buffered_fft=fft(input_sig_buffered); % take fft of each buffered partition
-input_sig_buffered_fft(abs(input_sig_buffered_fft) < threshold)=0; % make values zero if they have abs value smaller than threshold
+
+for i=1:partition_amount
+    thresholded_partition=input_sig_buffered_fft(:,i);
+    sorted_input_sig_fft=sort(abs(thresholded_partition));
+    threshold=sorted_input_sig_fft(ceil(compression_amount));
+    thresholded_partition(abs(thresholded_partition) < threshold)=0;
+    input_sig_buffered_fft(:,i)=thresholded_partition;
+end
+% input_sig_buffered_fft(abs(input_sig_buffered_fft) < threshold)=0; % make values zero if they have abs value smaller than threshold
+
 input_sig_buffered_thresholded=ifft(input_sig_buffered_fft);
 input_sig_thresholded=input_sig_buffered_thresholded(:); % obtain a vector from buffered & thresholded matrix
 
@@ -284,14 +295,23 @@ input_sig_thresholded=input_sig_buffered_thresholded(:); % obtain a vector from 
 input_sig_thresholded=input_sig_thresholded(1:length(input_sig));
 err_dft_comp=input_sig-input_sig_thresholded';
 
-%% Figure plots
+% Average power computation
+err_avg_pwr=err_dft_comp.^2;
+err_avg_pwr=mean(err_avg_pwr);
+err_tot_pwr=sum(err_dft_comp.^2);
+input_sig_avg_pwr=mean(input_sig.^2);
+
+
+input_sig_thresholded=input_sig_thresholded';
+
+%% Figure plots FFT
 
 % err signal
 figure, 
 plot(err_dft_comp);
 ylabel('magnitude')
 xlabel('samples')
-str=sprintf('error signal, average power of error: %f',power(err_dft_comp,2)./length(err_dft_comp));
+str=sprintf('error signal, average power of error: %f, \n average power of signal %f', err_avg_pwr,input_sig_avg_pwr);
 title(str);
 
 % FFT of input sig
@@ -311,7 +331,7 @@ title(str);
 
 %% spectrogram of compressed signal
 
-spectrogram_group9(input_sig, fs_generated, length(input_sig)/fs_generated);
+spectrogram_group9(input_sig_thresholded, fs_generated, length(input_sig)/fs_generated);
 
 %% Play compressed and original using DFT
 
@@ -320,3 +340,70 @@ spectrogram_group9(input_sig, fs_generated, length(input_sig)/fs_generated);
 % sound(real(input_sig), fs_generated);
 
 %% DCT
+
+%Listen, comment on quality, plot spectrogram of input and output, compute error signal, average error 
+partition_amount_dct=1000;
+
+% Sorting coeffs with respect to absolute values
+% sorted_input_sig_fft=sort(abs(fft(input_sig)));
+% Selecting threshold value (Decides on compression amount) (ascending order sorted so value represents the amount of eliminated elements)
+% threshold=sorted_input_sig_fft(ceil(compression_amount));
+% max_sorted_input=max(sorted_input_sig_fft);
+
+% Using DCT (Partition the input signal and apply quantization to frequency domain coefficients)
+N_blocksize_dct=floor(length(input_sig)/partition_amount_dct); % block size to be used in DCT
+compression_amount=9900*N_blocksize_dct/10000;
+% dct
+input_sig_buffered=buffer(input_sig ,N_blocksize_dct); % Partition the signal
+
+input_sig_buffered_dct=dct(input_sig_buffered,[],1,'Type',2); % take fft of each buffered partition
+
+for i=1:partition_amount_dct
+    thresholded_partition=input_sig_buffered_dct(:,i);
+    sorted_input_sig_dct=sort(abs(thresholded_partition));
+    threshold=sorted_input_sig_dct(ceil(compression_amount));
+    thresholded_partition(abs(thresholded_partition) < threshold)=0;
+    input_sig_buffered_dct(:,i)=thresholded_partition;
+end
+% input_sig_buffered_fft(abs(input_sig_buffered_fft) < threshold)=0; % make values zero if they have abs value smaller than threshold
+
+input_sig_buffered_thresholded=idct(input_sig_buffered_dct,[],1,'Type',2);
+input_sig_thresholded=input_sig_buffered_thresholded(:); % obtain a vector from buffered & thresholded matrix
+
+% Error signal computation
+input_sig_thresholded=input_sig_thresholded(1:length(input_sig));
+err_dft_comp=input_sig-input_sig_thresholded';
+
+% Average power computation
+err_avg_pwr=err_dft_comp.^2;
+err_avg_pwr=mean(err_avg_pwr);
+err_tot_pwr=sum(err_dft_comp.^2);
+input_sig_avg_pwr=mean(input_sig.^2);
+
+input_sig_thresholded=input_sig_thresholded';
+
+%% Figure plots FFT
+
+% err signal
+figure, 
+plot(err_dft_comp);
+ylabel('magnitude')
+xlabel('samples')
+str=sprintf('error signal, average power of error: %f, \n average power of signal %f', err_avg_pwr,input_sig_avg_pwr);
+title(str);
+
+% FFT of input sig
+figure, 
+subplot(1,2,1);
+plot(fftshift(abs(fft(input_sig))));
+title('original input signal')
+ylabel('magnitude')
+xlabel('samples')
+% FFT of thresholded sig
+subplot(1,2,2); 
+plot(abs(fftshift(fft(input_sig_thresholded))));
+ylabel('magnitude')
+xlabel('samples')
+str=sprintf('DCT-2 thresholded, percentage of deleted coefficients: %f',100*(compression_amount/N));
+title(str);
+

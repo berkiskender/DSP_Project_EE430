@@ -121,7 +121,8 @@ max_den=max(Den(:));
 
 clims=[min_den max_den] ;
 %im=imagesc(x,y,10*log10(Den.^2),clims);
-im=imagesc(x,y,Den,clims);
+figure,imagesc(x,y,Den,clims);
+title('spectrogram of input signal')
 xlabel('time(s)');
 ylabel('freq(Hz)');
 colorbar;

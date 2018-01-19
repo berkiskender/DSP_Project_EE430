@@ -355,7 +355,7 @@ N_blocksize_dct=floor(length(input_sig)/partition_amount_dct); % block size to b
 compression_amount=9900*N_blocksize_dct/10000;
 % dct
 input_sig_buffered=buffer(input_sig ,N_blocksize_dct); % Partition the signal
-
+% audioread
 input_sig_buffered_dct=dct(input_sig_buffered,[],1,'Type',2); % take fft of each buffered partition
 
 for i=1:partition_amount_dct

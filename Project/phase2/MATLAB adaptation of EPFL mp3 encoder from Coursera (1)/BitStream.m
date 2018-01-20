@@ -39,14 +39,14 @@ classdef BitStream
             mask = -mask - 1;   %for integers, ~x is equivalent to (-x) - 1
             mask = mask + intmax('uint32') + 1;
             mask=round(mask);
-            x = bitand(data,mask);
+            x = bitand(uint32(data),mask);
         end
   
   
         function x = invertmsb(~, data, nbits)
             % Invert MSB of data, data being only lowest nbits.
             mask = 1*2^(nbits-1);
-            x = bitxor(data,mask);
+            x = bitxor(round(data),mask);
         end
 
 

@@ -4,7 +4,7 @@ function x = quantization(sample, sf, ba, QCa, QCb)
     
     % This function will take five input arguments and it will return the quantized sample
     % uniformly quantized sample
-    x=((QCa*sample/sf)+QCb)*2.^(ba-1);
+    x= ((QCa*sample/sf)+QCb)*2.^(ba-1);
 end
 
 

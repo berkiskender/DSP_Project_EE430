@@ -1,6 +1,6 @@
 function Encoder_main_script()
-inwavfile = '0564.wav';
-outmp3file = '0564_compressed.mp3';
+inwavfile = './singing_44100.wav';
+outmp3file = './singing_44100.mp3';
 bitrate = 96;
 
 N_SUBBANDS = 32;

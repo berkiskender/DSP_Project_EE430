@@ -18,8 +18,8 @@ classdef BitStream
             % Insert lowest nbits of data in OutputBuffer.
             if nargin < 4,   invmsb = false;   end
             
-            if invmsb
-                data = self.invertmsb(data,nbits);
+            if invmsb % modified take care
+                data = round(self.invertmsb(data,nbits));
             end
             datainbytes = self.splitinbytes(data, nbits, bitand(self.pos,7));
             ind = floor(self.pos/8);
@@ -38,6 +38,7 @@ classdef BitStream
             mask = double(bitand(bitshift(uint64(4294967295),nbits),4294967295));
             mask = -mask - 1;   %for integers, ~x is equivalent to (-x) - 1
             mask = mask + intmax('uint32') + 1;
+            mask=round(mask);
             x = bitand(data,mask);
         end
   

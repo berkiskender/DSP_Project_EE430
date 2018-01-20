@@ -1,5 +1,5 @@
 
-% h=firpm(511,[0 .00391 .0156 .5]*2,[2 2 0 0]);
+% h=firpm(511,[0 .003906 .015625 .5]*2,[2 2 0 0]);
 h=prototype_filter;
 figure, plot(h);
 title('h[n]')
@@ -28,8 +28,14 @@ title('Magnitude response of h0 to h31')
 xlabel('frequency')
 ylabel('magnitude')
 
+t=linspace(0,1,512);
+t=t';
+x=cos(2*pi*20*t); % example sinusoidal
+h=prototype_filter;
+s = subband_filtering(x,h);
+X = scaled_fft_db(x)
+figure, plot(X);
+title ('257-point array of spectral magnitude values in dBs, normalized to 96dB');
+ylabel('magnitude (dB)')
 
-% figure, plot(phase(fft(h32)));
-% title('Phase response of h0 to h31')
-% xlabel('frequency')
-% ylabel('Phase')
+Encoder_main_script;

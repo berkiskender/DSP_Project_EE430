@@ -1,7 +1,7 @@
 function Encoder_main_script()
 inwavfile = './singing_44100.wav';
 outmp3file = './singing_44100.mp3';
-bitrate = 96;
+bitrate = 192;
 
 N_SUBBANDS = 32;
 FRAMES_PER_BLOCK = 12;

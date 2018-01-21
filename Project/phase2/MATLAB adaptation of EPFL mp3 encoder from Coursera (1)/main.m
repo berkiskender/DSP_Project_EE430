@@ -39,3 +39,26 @@ title ('257-point array of spectral magnitude values in dBs, normalized to 96dB'
 ylabel('magnitude (dB)')
 
 Encoder_main_script;
+
+figure,
+subplot(2,2,1);
+plot(fftshift(abs(fft(orig))));
+title('Original Signal')
+ylabel('Magnitude')
+xlabel('frequency (min-max=-+22050 Hz)')
+subplot(2,2,2);
+plot(fftshift(abs(fft(rate96))));
+title('compressed signal rate=96 kbps')
+ylabel('Magnitude')
+xlabel('frequency (min-max=-+22050 Hz)')
+subplot(2,2,3);
+plot(fftshift(abs(fft(rate128))));
+title('compressed signal rate=128 kbps')
+ylabel('Magnitude')
+xlabel('frequency (min-max=-+22050 Hz)')
+subplot(2,2,4);
+plot(fftshift(abs(fft(rate192))));
+title('compressed signal rate=192 kbps')
+ylabel('Magnitude')
+xlabel('frequency (min-max=-+22050 Hz)')
+

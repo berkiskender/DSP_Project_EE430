@@ -410,3 +410,29 @@ xlabel('samples')
 str=sprintf('DCT-2 thresholded, percentage of deleted coefficients: %f',100*(compression_amount/N_blocksize_dct));
 title(str);
 
+%% MDCT
+
+% partition input signal into overlapping blocks of 50%
+%Listen, comment on quality, plot spectrogram of input and output, compute error signal, average error 
+partition_amount_mdct=500;
+
+% Using MDCT (Partition the input signal and apply quantization to frequency domain coefficients)
+N2_blocksize_mdct=floor(length(input_sig)/(partition_amount_mdct/2)); % block size to be used in DCT
+N_blocksize_mdct=round(N2_blocksize_mdct/2);
+compression_amount=9000*N2_blocksize_mdct/10000;
+% mdct
+input_sig_buffered=buffer(input_sig ,N2_blocksize_mdct,round(N2_blocksize_mdct/2)); % Partition the signal
+
+y_input_sig_buffered=zeros(N_blocksize_mdct,partition_amount_mdct+1);
+
+ for k=1:partition_amount_mdct+1
+ for i=1:N_blocksize_mdct
+     if(i<(floor(N_blocksize_mdct/2)+1))
+         y_input_sig_buffered(i,k)=-input_sig_buffered(floor(i+3*N_blocksize_mdct/2),k)-input_sig_buffered(floor(3*N_blocksize_mdct/2-1-i),k);
+    else
+        y_input_sig_buffered(i,k)=input_sig_buffered(floor(i-N_blocksize_mdct/2),k)-input_sig_buffered(floor(3*N_blocksize_mdct/2-1-i),k); 
+    end
+    end
+end
+
+

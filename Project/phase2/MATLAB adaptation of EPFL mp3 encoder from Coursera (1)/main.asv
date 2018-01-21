@@ -60,23 +60,23 @@ xorig=xorig';
 
 figure,
 subplot(1,2,1);
-plot(xorig,fftshift(abs(fft(singing_44100_orig))));
+plot(x,fftshift(abs(fft(singing_44100_orig))));
 title('Original Signal')
 ylabel('Magnitude')
 xlabel('frequency (rad) (min-max=-+22050 Hz)')
 subplot(1,2,2);
-plot(x96,fftshift(abs(fft(singing_44100_96))));
+plot(x,fftshift(abs(fft(singing_44100_96))));
 title('compressed signal rate=96 kbps')
 ylabel('Magnitude')
 xlabel('frequency (rad) (min-max=-+22050 Hz)')
 figure,
 subplot(1,2,1);
-plot(x128,fftshift(abs(fft(singing_44100_128))));
+plot(x,fftshift(abs(fft(singing_44100_128))));
 title('compressed signal rate=128 kbps')
 ylabel('Magnitude')
 xlabel('frequency (rad) (min-max=-+22050 Hz)')
 subplot(1,2,2);
-plot(x192,fftshift(abs(fft(singing_44100_192))));
+plot(x,fftshift(abs(fft(singing_44100_192))));
 title('compressed signal rate=192 kbps')
 ylabel('Magnitude')
 xlabel('frequency (rad) (min-max=-+22050 Hz)')

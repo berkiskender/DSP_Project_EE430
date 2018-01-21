@@ -442,23 +442,17 @@ end
 % IDCT
 Beta=idct(input_sig_buffered_mdct,[],1,'Type',4); 
 
-alpha=zeros(1,N2_blocksize_mdct);
-
-for n=0:floor(N_blocksize_mdct/2)-1
-    alpha(n+1)=Beta((n+1)+floor(N_blocksize_mdct/2));
+for n=1:floor(N_blocksize_mdct/2)
+    alpha(n)=Beta(n+floor(N_blocksize_mdct/2));
 end
 
-%!!!
-for n=(floor(N_blocksize_mdct/2)):(floor(3*N_blocksize_mdct/2)-1)
-    alpha(n+1)=(-1)*Beta(ceil(3*N_blocksize_mdct/2)-(n+1));
+for n=floor(N_blocksize_mdct/2):floor(3*N_blocksize_mdct/2)
+    alpha(n)=-1*Beta(floor(3*N_blocksize_mdct/2-1)-n);
 end
 
-for n=(floor(3*N_blocksize_mdct/2)):(floor(N2_blocksize_mdct)-1)
-    alpha(n+1)=-1*Beta(-1*floor(3*N_blocksize_mdct/2)+(n+1));
+for n=3*N_blocksize_mdct/2:N2_blocksize_mdct)
+    alpha(n)=-1*Beta(floor(-3*N_blocksize_mdct/2)+n);
 end
-
-xr=zeros(N_blocksize_mdct);
-
 
 
 %% 

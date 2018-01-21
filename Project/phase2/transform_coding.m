@@ -378,7 +378,7 @@ err_tot_pwr=sum(err_dct_comp.^2);
 input_sig_avg_pwr=mean(input_sig.^2);
 
 input_sig_thresholded_dct=input_sig_thresholded_dct';
-avg_pwr_input_sig_thresholded_dct=mean(input_sig_thresholded_dct.^2)
+avg_pwr_input_sig_thresholded_dct=mean(input_sig_thresholded_dct.^2);
 %% Figure plots DCT
 
 % err signal
@@ -412,39 +412,34 @@ partition_amount_mdct=500;
 
 % Using MDCT (Partition the input signal and apply quantization to frequency domain coefficients)
 N2_blocksize_mdct=floor(length(input_sig)/(partition_amount_mdct/2)); % block size to be used in DCT
-<<<<<<< HEAD
+
 N_blocksize_mdct=round(N2_blocksize_mdct/2);
 compression_amount=9000*N2_blocksize_mdct/10000;
-=======
+
 N_blocksize_mdct=floor(N2_blocksize_mdct/2);
 compression_amount=9000*N_blocksize_mdct/10000;
->>>>>>> 0537f7d4b2996cf39904891c7fee1cac37400979
+
 % mdct
 input_sig_buffered=buffer(input_sig ,N2_blocksize_mdct,round(N2_blocksize_mdct/2)); % Partition the signal
 
 y_input_sig_buffered=zeros(N_blocksize_mdct,partition_amount_mdct+1);
 
-<<<<<<< HEAD
  for k=1:partition_amount_mdct+1
  for i=1:N_blocksize_mdct
      if(i<(floor(N_blocksize_mdct/2)+1))
          y_input_sig_buffered(i,k)=-input_sig_buffered(floor(i+3*N_blocksize_mdct/2),k)-input_sig_buffered(floor(3*N_blocksize_mdct/2-1-i),k);
     else
         y_input_sig_buffered(i,k)=input_sig_buffered(floor(i-N_blocksize_mdct/2),k)-input_sig_buffered(floor(3*N_blocksize_mdct/2-1-i),k); 
-=======
 for k=1:partition_amount_mdct
 for i=0:N_blocksize_mdct-1
     if(i<floor(N_blocksize_mdct/2)+1)
         y_input_sig_buffered(i+1,k)=-input_sig_buffered(floor(i+3*N_blocksize_mdct/2)+1,k)-input_sig_buffered(floor(3*N_blocksize_mdct/2-1-i)+1,k);
     else
         y_input_sig_buffered(i+1,k)=input_sig_buffered(floor(i-N_blocksize_mdct/2)+1,k)-input_sig_buffered(floor(3*N_blocksize_mdct/2-1-i)+1,k); 
->>>>>>> 0537f7d4b2996cf39904891c7fee1cac37400979
     end
     end
 end
 
-<<<<<<< HEAD
-=======
 input_sig_buffered_mdct=dct(y_input_sig_buffered,[],1,'Type',4);
 
 for i=1:partition_amount_mdct
@@ -498,9 +493,4 @@ end
 %     thresholded_partition(abs(thresholded_partition) < threshold_dct)=0;
 %     input_sig_buffered_mdct(:,i)=thresholded_partition;
 % end
-
-
-
-
->>>>>>> 0537f7d4b2996cf39904891c7fee1cac37400979
 

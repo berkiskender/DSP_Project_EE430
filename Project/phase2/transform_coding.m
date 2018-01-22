@@ -482,4 +482,3 @@ end
 
 xr_after=xr_after(:);
 
-err=xr_after(1:length(input_sig))-input_sig';

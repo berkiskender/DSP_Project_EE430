@@ -262,7 +262,7 @@ spectrogram_group9(input_sig, fs_generated, length(input_sig)/fs_generated);
 %corresponding threshold automatically for each input audio signal
 
 %Listen, comment on quality, plot spectrogram of input and output, compute error signal, average error 
-partition_amount_dft=250;
+partition_amount_dft=500;
 
 % Sorting coeffs with respect to absolute values
 % sorted_input_sig_fft=sort(abs(fft(input_sig)));
@@ -272,7 +272,7 @@ partition_amount_dft=250;
 
 % Using DFT (Partition the input signal and apply quantization to frequency domain coefficients)
 N_blocksize=floor(length(input_sig)/partition_amount_dft); % block size to be used in DFT
-compression_amount=9000*N_blocksize/10000;
+compression_amount=7000*N_blocksize/10000;
 
 input_sig_buffered=buffer(input_sig ,N_blocksize); % Partition the signal
 
@@ -349,7 +349,7 @@ partition_amount_dct=500;
 
 % Using DCT (Partition the input signal and apply quantization to frequency domain coefficients)
 N_blocksize_dct=floor(length(input_sig)/partition_amount_dct); % block size to be used in DCT
-compression_amount=9000*N_blocksize_dct/10000;
+compression_amount=7000*N_blocksize_dct/10000;
 % dct
 input_sig_buffered=buffer(input_sig ,N_blocksize_dct); % Partition the signal
 % audioread
@@ -387,7 +387,7 @@ figure,
 plot(err_dct_comp);
 ylabel('magnitude')
 xlabel('samples')
-str=sprintf('DCT-2 error signal, average power of error: %f, \n average power of signal %f, \n partition amount: %d', err_avg_pwr,input_sig_avg_pwr, partition_amount_dct);
+str=sprintf('DCT-2 error signal, average power of error: %f, \n average power of signal %f, \n partition amount: %d', err_avg_pwr*1e8,input_sig_avg_pwr*1e8, partition_amount_dct);
 title(str);
 
 % FFT of input sig

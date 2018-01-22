@@ -337,3 +337,15 @@ fprintf('\nSpectrogram of the signal downsampled by 2.5:\n')
 spectrogram_group9(downsampled25, fs_generated, length(downsampled25)/fs_generated);
 fprintf('\nSpectrogram of the signal decimated by 2.5:\n')
 spectrogram_group9(decimated25, fs_generated, length(decimated25)/fs_generated);
+
+%% Listening to the downsampled, decimated sounds
+
+% sound(input_sig, fs_generated);
+% sound(downsampled2, fs_generated/2);
+% sound(downsampled3, fs_generated/3);
+% sound(downsampled6, fs_generated/6);
+% sound(downsampled25, fs_generated/2.5);
+% sound(decimated2, fs_generated/2);
+% sound(decimated3, fs_generated/3);
+% sound(decimated6, fs_generated/6);
+% sound(decimated25, fs_generated/2.5);

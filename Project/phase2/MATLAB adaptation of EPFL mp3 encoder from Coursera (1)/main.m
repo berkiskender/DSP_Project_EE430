@@ -6,14 +6,16 @@ title('h[n]')
 xlabel('samples')
 ylabel('magnitude')
 
-figure, plot(abs(fft(h)));
+x=-pi+pi/256:pi/256:pi;
+
+figure, plot(x,abs(fftshift(fft(h))));
 title('Magnitude response of h[n]')
-xlabel('frequency')
+xlabel('frequency (rad)')
 ylabel('magnitude')
 
-figure, plot(phase(fft(h)));
+figure, plot(x,phase(fftshift(fft(h))));
 title('Phase response of h[n]')
-xlabel('frequency')
+xlabel('frequency (rad)')
 ylabel('phase')
 length(h);
 
@@ -23,10 +25,16 @@ for k=0:31
     end
 end
 
-figure, plot(abs(fft(h32)));
+figure, plot(x,abs(fftshift(fft(h32))));
 title('Magnitude response of h0 to h31')
-xlabel('frequency')
+xlabel('frequency (rad)')
 ylabel('magnitude')
+
+figure, plot(x,phase(fftshift(fft(h32(:,3)))));
+title('Phase response of h0 to h31')
+xlabel('frequency (rad)')
+ylabel('phase')
+
 
 t=linspace(0,1,512);
 t=t';
@@ -40,25 +48,36 @@ ylabel('magnitude (dB)')
 
 Encoder_main_script;
 
+x128=-pi+pi/(0.5*length(singing_44100_128)):pi/(0.5*length(singing_44100_128)):pi;
+x96=-pi+pi/(0.5*length(singing_44100_96)):pi/(0.5*length(singing_44100_96)):pi;
+x192=-pi+pi/(0.5*length(singing_44100_192)):pi/(0.5*length(singing_44100_192)):pi;
+xorig=-pi+pi/(0.5*length(singing_44100_orig)):pi/(0.5*length(singing_44100_orig)):pi;;
+
+x128=x128';
+x96=x96';
+x192=x192';
+xorig=xorig';
+
 figure,
-subplot(2,2,1);
-plot(fftshift(abs(fft(orig))));
+subplot(1,2,1);
+plot(xorig,fftshift(abs(fft(singing_44100_orig))));
 title('Original Signal')
 ylabel('Magnitude')
-xlabel('frequency (min-max=-+22050 Hz)')
-subplot(2,2,2);
-plot(fftshift(abs(fft(rate96))));
+xlabel('frequency (rad) (min-max=-+22050 Hz)')
+subplot(1,2,2);
+plot(x96,fftshift(abs(fft(singing_44100_96))));
 title('compressed signal rate=96 kbps')
 ylabel('Magnitude')
-xlabel('frequency (min-max=-+22050 Hz)')
-subplot(2,2,3);
-plot(fftshift(abs(fft(rate128))));
+xlabel('frequency (rad) (min-max=-+22050 Hz)')
+figure,
+subplot(1,2,1);
+plot(x128,fftshift(abs(fft(singing_44100_128))));
 title('compressed signal rate=128 kbps')
 ylabel('Magnitude')
-xlabel('frequency (min-max=-+22050 Hz)')
-subplot(2,2,4);
-plot(fftshift(abs(fft(rate192))));
+xlabel('frequency (rad) (min-max=-+22050 Hz)')
+subplot(1,2,2);
+plot(x192,fftshift(abs(fft(singing_44100_192))));
 title('compressed signal rate=192 kbps')
 ylabel('Magnitude')
-xlabel('frequency (min-max=-+22050 Hz)')
+xlabel('frequency (rad) (min-max=-+22050 Hz)')
 

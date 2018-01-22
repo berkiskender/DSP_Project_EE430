@@ -416,11 +416,9 @@ N2_blocksize_mdct=floor(length(input_sig)/(partition_amount_mdct/2)); % block si
 
 N_blocksize_mdct=round(N2_blocksize_mdct/2);
 compression_amount=9000*N2_blocksize_mdct/10000;
-%=======
+
 N_blocksize_mdct=floor(N2_blocksize_mdct/2);
 compression_amount=9000*N_blocksize_mdct/10000;
-%>>>>>>> 0537f7d4b2996cf39904891c7fee1cac37400979
-%=======
 
 N_blocksize_mdct=round(N2_blocksize_mdct/2);
 compression_amount=9000*N2_blocksize_mdct/10000;
@@ -428,49 +426,31 @@ compression_amount=9000*N2_blocksize_mdct/10000;
 N_blocksize_mdct=floor(N2_blocksize_mdct/2);
 compression_amount=9000*N_blocksize_mdct/10000;
 
-%>>>>>>> b75b29523feda09decf7596d49b6cd970bd40dfe
 % mdct
 input_sig_buffered=buffer(input_sig ,N2_blocksize_mdct,round(N2_blocksize_mdct/2)); % Partition the signal
 
 y_input_sig_buffered=zeros(N_blocksize_mdct,partition_amount_mdct+1);
-
-%<<<<<<< HEAD
-%<<<<<<< HEAD
-%=======
-%>>>>>>> b75b29523feda09decf7596d49b6cd970bd40dfe
  for k=1:partition_amount_mdct+1
  for i=1:N_blocksize_mdct
      if(i<(floor(N_blocksize_mdct/2)+1))
          y_input_sig_buffered(i,k)=-input_sig_buffered(floor(i+3*N_blocksize_mdct/2),k)-input_sig_buffered(floor(3*N_blocksize_mdct/2-1-i),k);
-    else
-%<<<<<<< HEAD
+     else
         y_input_sig_buffered(i,k)=input_sig_buffered(floor(i-N_blocksize_mdct/2),k)-input_sig_buffered(floor(3*N_blocksize_mdct/2-1-i),k);
      end
  end
  end
-%=======
-%=======
         y_input_sig_buffered(i,k)=input_sig_buffered(floor(i-N_blocksize_mdct/2),k)-input_sig_buffered(floor(3*N_blocksize_mdct/2-1-i),k); 
-%>>>>>>> b75b29523feda09decf7596d49b6cd970bd40dfe
+
 for k=1:partition_amount_mdct
 for i=0:N_blocksize_mdct-1
     if(i<floor(N_blocksize_mdct/2)+1)
         y_input_sig_buffered(i+1,k)=-input_sig_buffered(floor(i+3*N_blocksize_mdct/2)+1,k)-input_sig_buffered(floor(3*N_blocksize_mdct/2-1-i)+1,k);
     else
         y_input_sig_buffered(i+1,k)=input_sig_buffered(floor(i-N_blocksize_mdct/2)+1,k)-input_sig_buffered(floor(3*N_blocksize_mdct/2-1-i)+1,k); 
-%<<<<<<< HEAD
-%>>>>>>> 0537f7d4b2996cf39904891c7fee1cac37400979
-%=======
-%>>>>>>> b75b29523feda09decf7596d49b6cd970bd40dfe
     end
     end
 end
 
-%<<<<<<< HEAD
-%<<<<<<< HEAD
-%=======
-%=======
-%>>>>>>> b75b29523feda09decf7596d49b6cd970bd40dfe
 input_sig_buffered_mdct=dct(y_input_sig_buffered,[],1,'Type',4);
 
 for i=1:partition_amount_mdct
@@ -524,12 +504,3 @@ end
 %     thresholded_partition(abs(thresholded_partition) < threshold_dct)=0;
 %     input_sig_buffered_mdct(:,i)=thresholded_partition;
 % end
-
-%<<<<<<< HEAD
-
-
-
-%>>>>>>> 0537f7d4b2996cf39904891c7fee1cac37400979
-
-%=======
-%>>>>>>> b75b29523feda09decf7596d49b6cd970bd40dfe

@@ -272,6 +272,8 @@ partition_amount_dft=500;
 
 % Using DFT (Partition the input signal and apply quantization to frequency domain coefficients)
 N_blocksize=floor(length(input_sig)/partition_amount_dft); % block size to be used in DFT
+
+% Determine the compression rate from here **************
 compression_amount=7000*N_blocksize/10000;
 
 input_sig_buffered=buffer(input_sig ,N_blocksize); % Partition the signal
@@ -410,14 +412,14 @@ title(str);
 % partition input signal into overlapping blocks of 50%
 %Listen, comment on quality, plot spectrogram of input and output, compute error signal, average error 
 
-partition_amount_mdct=500; %notice that it is 2 times the required block number for previous cases
+partition_amount_mdct=40; %notice that it is 2 times the required block number for previous cases
 
 
 % Using MDCT (Partition the input signal and apply quantization to frequency domain coefficients)
 N2_blocksize_mdct=floor(length(input_sig)/(partition_amount_mdct/2)); % block size to be used in DCT
 
 N_blocksize_mdct=floor(N2_blocksize_mdct/2);
-compression_amount=9000*N2_blocksize_mdct/10000;
+compression_amount=7000*N2_blocksize_mdct/10000;
 
 % mdct
 input_sig_buffered=buffer(input_sig ,N2_blocksize_mdct,round(N2_blocksize_mdct/2)); % Partition the signal
@@ -426,14 +428,14 @@ y_input_sig_buffered=zeros(N2_blocksize_mdct,ceil(length(input_sig_buffered(1,:)
  for k=1:N2_blocksize_mdct
  for i=1:partition_amount_mdct/2
      if(i<(floor(partition_amount_mdct/4)+1))
-         y_input_sig_buffered(k,i)=-input_sig_buffered(k,floor(i-1+3*partition_amount_mdct/4))-input_sig_buffered(k,floor(3*partition_amount_mdct/4-i));
+         y_input_sig_buffered(k,i)=-input_sig_buffered(k,floor(i-1+3*partition_amount_mdct/4)+1)-input_sig_buffered(k,floor(3*partition_amount_mdct/4-i)+1);
      else
-         y_input_sig_buffered(k,i)=input_sig_buffered(k,floor(i-partition_amount_mdct/4))-input_sig_buffered(k,floor(3*partition_amount_mdct/4-i));
+         y_input_sig_buffered(k,i)=input_sig_buffered(k,floor(i-partition_amount_mdct/4))-input_sig_buffered(k,floor(3*partition_amount_mdct/4-i)+1);
      end
  end
  end
 
-%X[K]
+% X[K]
 input_sig_buffered_mdct=dct(y_input_sig_buffered,[],1,'Type',4);
 
 for i=1:length(y_input_sig_buffered(1,:))
@@ -447,6 +449,7 @@ end
 % IDCT of X[K]
 Beta=idct(input_sig_buffered_mdct,[],1,'Type',4); 
 
+% Alpha calculation
 alpha=zeros(N2_blocksize_mdct,length(input_sig_buffered(1,:)));
 
 for k=1:length(alpha(:,1))
@@ -457,7 +460,7 @@ end
 
 %!!!
 for n=(floor(length(input_sig_buffered(1,:))/4):(floor(3*length(input_sig_buffered(1,:))/4)-1))
-    alpha(k,n+1)=(-1)*Beta(k,ceil(3*length(input_sig_buffered(1,:))/4)-(n+1));
+    alpha(k,n+1)=(-1)*Beta(k,ceil(3*length(input_sig_buffered(1,:))/4)-(n+1)+1); %-1
 end
 
 for n=(floor(3*length(input_sig_buffered(1,:))/4)):(floor(length(input_sig_buffered(1,:)))-1)
@@ -469,16 +472,147 @@ end
 % delay operation
 xr=zeros(length(alpha(:,1)),ceil(length(alpha(1,:))/2));
 
-xr_down=[zeros(1,partition_amount_mdct/2+1);xr];
-xr_up=[xr;zeros(1,partition_amount_mdct/2+1)];
+xr_down=[zeros(1,partition_amount_mdct/2);xr]; %+1
+xr_up=[xr;zeros(1,partition_amount_mdct/2)]; %+1
 xr_after=zeros(length(alpha(:,1))+1,ceil(length(alpha(1,:))/2));
 
-alpha1=[alpha;zeros(1,partition_amount_mdct+1)];
-alpha2=[zeros(1,partition_amount_mdct+1);alpha];
+alpha1=[alpha;zeros(1,partition_amount_mdct)]; %+1
+alpha2=[zeros(1,partition_amount_mdct);alpha]; %+1
 
-for n=1:partition_amount_mdct/2+1
-    xr_after(:,n)=alpha1(:,n)+alpha2(:,n+partition_amount_mdct/2);
+for n=1:partition_amount_mdct/2 %+1
+%     xr_after(:,n)=(sin((pi/N2_blocksize_mdct)*(n-1/2)))*alpha1(:,n)+((sin((pi/N2_blocksize_mdct)*(n+partition_amount_mdct/2-1/2))))*alpha2(:,n+partition_amount_mdct/2);
+    xr_after(:,n)=(1/sqrt(2))*alpha1(:,n)+((1/sqrt(2)))*alpha2(:,n+partition_amount_mdct/2);
+end
+xr_after=fliplr(xr_after);
+xr_after=xr_after(:);
+
+%% Figure plots MDCT
+
+% err signal
+% figure, 
+% plot(err_dct_comp);
+% ylabel('magnitude')
+% xlabel('samples')
+% str=sprintf('DCT-2 error signal, average power of error: %f, \n average power of signal %f, \n partition amount: %d', err_avg_pwr*1e8,input_sig_avg_pwr*1e8, partition_amount_dct);
+% title(str);
+
+% FFT of input sig
+figure, 
+subplot(1,2,1);
+plot(abs(fftshift(fft(input_sig))));
+title('original input signal DCT')
+ylabel('magnitude')
+xlabel('samples')
+% FFT of thresholded sig
+subplot(1,2,2); 
+plot(abs(fftshift(fft(xr_after))));
+ylabel('magnitude')
+xlabel('samples')
+str=sprintf('MDCT thresholded, percentage of deleted coefficients: %f, \n partition amount: %d',100*(compression_amount/N2_blocksize_mdct),partition_amount_mdct);
+title(str);
+
+% FFT of input sig
+figure, 
+subplot(1,2,1);
+plot(phase(fftshift(fft(input_sig))));
+title('original input signal DCT')
+ylabel('magnitude')
+xlabel('samples')
+% FFT of thresholded sig
+subplot(1,2,2); 
+plot(phase(fftshift(fft(xr_after))));
+ylabel('magnitude')
+xlabel('samples')
+str=sprintf('MDCT thresholded, percentage of deleted coefficients: %f, \n partition amount: %d',100*(compression_amount/N2_blocksize_mdct),partition_amount_mdct);
+title(str);
+
+
+
+%% MDCT 2nd trial
+input_sig_T=input_sig';
+[len,num]=size(input_sig_T);
+
+% MDCT works for lengths on the order of 4
+if (rem(len,4)~=0)
+   fprintf('Erroneous length'); 
 end
 
-xr_after=xr_after(:);
+N=len; % Window length
+M=N/2; % number of coefficients
+N4=N/4;
+Nsqrt=sqrt(N);
+
+% Calculation of yn, a matrix for rotation is used. 
+rot=zeros(len,num);
+
+% Shifting the signal
+t=(0:(N4-1)).';
+rot(t+1,:) = -1*input_sig_T(t+3*N4+1,:);
+t=(N4:(N-1)).';
+rot(t+1,:) =  input_sig_T(t-N4+1,:);
+
+t = (0:(N4-1)).';
+w = diag(sparse(exp(-j*2*pi*(t+1/8)/N)));
+
+t = (0:(N4-1)).';
+c =(rot(2*t+1,:)-rot(N-1-2*t+1,:))-j*(rot(M+2*t+1,:)-rot(M-1-2*t+1,:));
+
+c = 0.5*w*c;
+clear rot;
+
+c = fft(c,N4);
+
+c = (2/Nsqrt)*w*c;
+
+t = (0:(N4-1)).';
+
+y=zeros(len,num);
+
+y(2*t+1,:)     =  real(c(t+1,:));
+y(M-1-2*t+1,:) = -imag(c(t+1,:));
+
+%% MDCT 3rd trial
+
+%Listen, comment on quality, plot spectrogram of input and output, compute error signal, average error 
+partition_amount_mdct=500;
+
+% Using DCT (Partition the input signal and apply quantization to frequency domain coefficients)
+N_blocksize_mdct=floor(length(input_sig)/partition_amount_mdct); % block size to be used in DCT
+compression_amount=8000*(N_blocksize_mdct/2)/10000;
+% dct
+input_sig_buffered=buffer(input_sig ,N_blocksize_mdct); % Partition the signal
+
+input_sig_buffered_mdct=zeros(length(input_sig_buffered(:,1))/2,length(input_sig_buffered(1,:)));
+% input_sig_buffered_mdct=input_sig_buffered_mdct';
+input_sig_buffered_T=input_sig_buffered';
+
+for k=1:length(input_sig_buffered(1,:))
+input_sig_buffered_mdct(:,k)=mdct4(input_sig_buffered(:,k)); % take mdct of each buffered partition
+end
+
+for i=1:partition_amount_mdct
+    thresholded_partition=input_sig_buffered_mdct(:,i);
+    sorted_input_sig_mdct=sort(abs(thresholded_partition));
+    threshold_mdct=sorted_input_sig_mdct(ceil(compression_amount));
+    thresholded_partition(abs(thresholded_partition) < threshold_mdct)=0;
+    input_sig_buffered_mdct(:,i)=thresholded_partition;
+end
+% input_sig_buffered_fft(abs(input_sig_buffered_fft) < threshold)=0; % make values zero if they have abs value smaller than threshold
+
+input_sig_buffered_thresholded=imdct4(input_sig_buffered_mdct);
+input_sig_thresholded=input_sig_buffered_thresholded(:); % obtain a vector from buffered & thresholded matrix
+
+% % Error signal computation
+% input_sig_thresholded_mdct=input_sig_thresholded(1:length(input_sig)/2);
+% err_dct_comp=input_sig-input_sig_thresholded_mdct';
+% 
+% % Average power computation
+% err_avg_pwr=err_dct_comp.^2;
+% err_avg_pwr=mean(err_avg_pwr);
+% err_tot_pwr=sum(err_dct_comp.^2);
+% input_sig_avg_pwr=mean(input_sig.^2);
+% 
+% input_sig_thresholded_mdct=input_sig_thresholded_mdct';
+% avg_pwr_input_sig_thresholded_mdct=mean(input_sig_thresholded_mdct.^2);
+% numzeros_mdct=nnz(~real(input_sig_buffered_mdct));
 

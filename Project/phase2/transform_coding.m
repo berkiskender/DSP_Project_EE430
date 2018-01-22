@@ -262,7 +262,7 @@ spectrogram_group9(input_sig, fs_generated, length(input_sig)/fs_generated);
 %corresponding threshold automatically for each input audio signal
 
 %Listen, comment on quality, plot spectrogram of input and output, compute error signal, average error 
-partition_amount_dft=500;
+partition_amount_dft=250;
 
 % Sorting coeffs with respect to absolute values
 % sorted_input_sig_fft=sort(abs(fft(input_sig)));
@@ -313,7 +313,7 @@ figure,
 plot(err_dft_comp);
 ylabel('magnitude')
 xlabel('samples')
-str=sprintf('DFT error signal, average power of error: %f, \n average power of signal %f, \n partition amount: %d', err_avg_pwr,input_sig_avg_pwr, partition_amount_dft);
+str=sprintf('DFT error signal, average power of error: %f, \n average power of signal %f, \n partition amount: %d', err_avg_pwr*1e8,input_sig_avg_pwr*1e8, partition_amount_dft);
 title(str);
 
 % FFT of input sig

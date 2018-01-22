@@ -1,6 +1,5 @@
 %phase 2-3
-t=0:0.00002083:5;
-input_sig=100*sin(2*pi*2.*t);
+input_sig=input_sig(10000000:10000300);
 
 
 

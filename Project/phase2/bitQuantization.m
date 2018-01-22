@@ -1,5 +1,4 @@
-
-%% Transform Coding
+%% Bit Quantization
 
 prompt='Do you want to analyze a \n0)Recorded sound \n1)Sound data from a file \n2)Generated data ?';
 choice = input(prompt);
@@ -252,262 +251,77 @@ if(choice==2)
 N=N_signal;    
 end
 
-%% Input signal spectrogram
 
-spectrogram_group9(input_sig, fs_generated, length(input_sig)/fs_generated);
+%% 8-bit quantization
 
-%% DFT
-%Coding (Supply desired number of nonzero coefficients)
-%Sort absolute values of the coefficients and then determine the
-%corresponding threshold automatically for each input audio signal
+encoded_signal_8=uencode(input_sig,8,max(input_sig));
 
-%Listen, comment on quality, plot spectrogram of input and output, compute error signal, average error 
-partition_amount_dft=250;
+[a,i]=max(input_sig);
 
-% Sorting coeffs with respect to absolute values
-% sorted_input_sig_fft=sort(abs(fft(input_sig)));
-% Selecting threshold value (Decides on compression amount) (ascending order sorted so value represents the amount of eliminated elements)
-% threshold=sorted_input_sig_fft(ceil(compression_amount));
-% max_sorted_input=max(sorted_input_sig_fft);
+decoded_signal_8=udecode(encoded_signal_8,8,max(input_sig));
+sample_axis=1:length(input_sig);
+%%plot(u,recorded_double);
+figure
+ax1 = subplot(2,1,1);
+stem(ax1,sample_axis,decoded_signal_8);
+hold on
+stem(ax1,sample_axis,input_sig);
+title(ax1,'Original Signal and Decoded Signal for 8 bit quantization');
+legend(ax1,'Original Signal','Decoded signal');
+error_signal_8=input_sig-decoded_signal_8;
+error_signal_power_8=error_signal_8.*error_signal_8;
+ax2=subplot(2,1,2);
+stem(ax2,sample_axis,error_signal_8);
+title(ax2,'Error Signal');
+min_error_signal_8=min(error_signal_8);
+max_error_signal_8=max(error_signal_8);
+mean_error_signal_8=mean(abs(error_signal_8));
 
-% Using DFT (Partition the input signal and apply quantization to frequency domain coefficients)
-N_blocksize=floor(length(input_sig)/partition_amount_dft); % block size to be used in DFT
-compression_amount=9000*N_blocksize/10000;
+%% 6-bit quantization
 
-input_sig_buffered=buffer(input_sig ,N_blocksize); % Partition the signal
+encoded_signal_6=uencode(input_sig,6,max(input_sig));
 
-input_sig_buffered_fft=fft(input_sig_buffered); % take fft of each buffered partition
+[a,i]=max(input_sig);
 
-for i=1:partition_amount_dft
-    thresholded_partition=input_sig_buffered_fft(:,i);
-    sorted_input_sig_fft=sort(abs(thresholded_partition));
-    threshold=sorted_input_sig_fft(ceil(compression_amount));
-    thresholded_partition(abs(thresholded_partition) < threshold)=0;
-    input_sig_buffered_fft(:,i)=thresholded_partition;
-end
-% input_sig_buffered_fft(abs(input_sig_buffered_fft) < threshold)=0; % make values zero if they have abs value smaller than threshold
+decoded_signal_6=udecode(encoded_signal_6,6,max(input_sig));
+sample_axis=1:length(input_sig);
+%%plot(u,recorded_double);
+figure
+ax1 = subplot(2,1,1);
+stem(ax1,sample_axis,decoded_signal_6);
+hold on
+stem(ax1,sample_axis,input_sig);
+title(ax1,'Original Signal and Decoded Signal for 6 bit quantization');
+legend(ax1,'Original Signal','Decoded Signal');
+error_signal_6=input_sig-decoded_signal_6;
+error_signal_power_6=error_signal_6.*error_signal_6;
+ax2=subplot(2,1,2);
+stem(ax2,sample_axis,error_signal_6);
+title(ax2,'Error Signal');
+min_error_signal_6=min(error_signal_6);
+max_error_signal_6=max(error_signal_6);
+mean_error_signal_6=mean(abs(error_signal_6));
+%% 4-bit quantization
 
-input_sig_buffered_thresholded=ifft(input_sig_buffered_fft);
-input_sig_thresholded=input_sig_buffered_thresholded(:); % obtain a vector from buffered & thresholded matrix
+encoded_signal_4=uencode(input_sig,4,max(input_sig));
 
-% Error signal computation
-input_sig_thresholded=input_sig_thresholded(1:length(input_sig));
-err_dft_comp=input_sig-input_sig_thresholded';
+[a,i]=max(input_sig);
 
-% Average power computation
-err_avg_pwr=err_dft_comp.^2;
-err_avg_pwr=mean(err_avg_pwr);
-err_tot_pwr=sum(err_dft_comp.^2);
-input_sig_avg_pwr=mean(input_sig.^2);
-
-
-input_sig_thresholded=input_sig_thresholded';
-avg_pwr_input_sig_thresholded=mean(input_sig_thresholded.^2);
-
-numzeros_dft=nnz(~real(input_sig_buffered_fft));
-
-%% Figure plots FFT
-
-% err signal
-figure, 
-plot(err_dft_comp);
-ylabel('magnitude')
-xlabel('samples')
-str=sprintf('DFT error signal, average power of error: %f, \n average power of signal %f, \n partition amount: %d', err_avg_pwr*1e8,input_sig_avg_pwr*1e8, partition_amount_dft);
-title(str);
-
-% FFT of input sig
-figure, 
-subplot(1,2,1);
-plot(fftshift(abs(fft(input_sig))));
-title('original input signal DFT')
-ylabel('magnitude')
-xlabel('samples')
-% FFT of thresholded sig
-subplot(1,2,2); 
-plot(abs(fftshift(fft(input_sig_thresholded))));
-ylabel('magnitude')
-xlabel('samples')
-str=sprintf('DFT thresholded, percentage of deleted coefficients: %f, \n partition amount: %d',100*(compression_amount/N_blocksize), partition_amount_dft);
-title(str);
-
-%% spectrogram of compressed signal
-fs_generated=44100;
-spectrogram_group9(input_sig_thresholded, fs_generated, length(input_sig)/fs_generated);
-
-%% Play compressed and original using DFT
-
-% input_sig_thresholded=ifft(input_sig_thresholded_fft);
-% sound(real(input_sig_thresholded_dct), fs_generated);
-% sound(real(input_sig_thresholded), fs_generated);
-% sound(real(input_sig), fs_generated);
-
-%% DCT
-
-%Listen, comment on quality, plot spectrogram of input and output, compute error signal, average error 
-partition_amount_dct=500;
-
-% Using DCT (Partition the input signal and apply quantization to frequency domain coefficients)
-N_blocksize_dct=floor(length(input_sig)/partition_amount_dct); % block size to be used in DCT
-compression_amount=9000*N_blocksize_dct/10000;
-% dct
-input_sig_buffered=buffer(input_sig ,N_blocksize_dct); % Partition the signal
-% audioread
-input_sig_buffered_dct=dct(input_sig_buffered,[],1,'Type',2); % take dct of each buffered partition
-
-for i=1:partition_amount_dct
-    thresholded_partition=input_sig_buffered_dct(:,i);
-    sorted_input_sig_dct=sort(abs(thresholded_partition));
-    threshold_dct=sorted_input_sig_dct(ceil(compression_amount));
-    thresholded_partition(abs(thresholded_partition) < threshold_dct)=0;
-    input_sig_buffered_dct(:,i)=thresholded_partition;
-end
-% input_sig_buffered_fft(abs(input_sig_buffered_fft) < threshold)=0; % make values zero if they have abs value smaller than threshold
-
-input_sig_buffered_thresholded=idct(input_sig_buffered_dct,[],1,'Type',2);
-input_sig_thresholded=input_sig_buffered_thresholded(:); % obtain a vector from buffered & thresholded matrix
-
-% Error signal computation
-input_sig_thresholded_dct=input_sig_thresholded(1:length(input_sig));
-err_dct_comp=input_sig-input_sig_thresholded_dct';
-
-% Average power computation
-err_avg_pwr=err_dct_comp.^2;
-err_avg_pwr=mean(err_avg_pwr);
-err_tot_pwr=sum(err_dct_comp.^2);
-input_sig_avg_pwr=mean(input_sig.^2);
-
-input_sig_thresholded_dct=input_sig_thresholded_dct';
-avg_pwr_input_sig_thresholded_dct=mean(input_sig_thresholded_dct.^2);
-numzeros_dct=nnz(~real(input_sig_buffered_dct));
-%% Figure plots DCT
-
-% err signal
-figure, 
-plot(err_dct_comp);
-ylabel('magnitude')
-xlabel('samples')
-str=sprintf('DCT-2 error signal, average power of error: %f, \n average power of signal %f, \n partition amount: %d', err_avg_pwr,input_sig_avg_pwr, partition_amount_dct);
-title(str);
-
-% FFT of input sig
-figure, 
-subplot(1,2,1);
-plot(abs(fftshift(fft(input_sig))));
-title('original input signal DCT')
-ylabel('magnitude')
-xlabel('samples')
-% FFT of thresholded sig
-subplot(1,2,2); 
-plot(abs(fftshift(fft(input_sig_thresholded))));
-ylabel('magnitude')
-xlabel('samples')
-str=sprintf('DCT-2 thresholded, percentage of deleted coefficients: %f, \n partition amount: %d',100*(compression_amount/N_blocksize_dct),partition_amount_dct);
-title(str);
-
-%% MDCT
-
-% partition input signal into overlapping blocks of 50%
-%Listen, comment on quality, plot spectrogram of input and output, compute error signal, average error 
-
-partition_amount_mdct=500; %notice that it is 2 times the required block number for previous cases
-
-
-% Using MDCT (Partition the input signal and apply quantization to frequency domain coefficients)
-N2_blocksize_mdct=floor(length(input_sig)/(partition_amount_mdct/2)); % block size to be used in DCT
-
-N_blocksize_mdct=floor(N2_blocksize_mdct/2);
-compression_amount=9000*N2_blocksize_mdct/10000;
-
-% mdct
-input_sig_buffered=buffer(input_sig ,N2_blocksize_mdct,round(N2_blocksize_mdct/2)); % Partition the signal
-y_input_sig_buffered=zeros(N2_blocksize_mdct,ceil(length(input_sig_buffered(1,:))/2));
-
- for k=1:N2_blocksize_mdct
- for i=1:partition_amount_mdct/2
-     if(i<(floor(partition_amount_mdct/4)+1))
-         y_input_sig_buffered(k,i)=-input_sig_buffered(k,floor(i-1+3*partition_amount_mdct/4))-input_sig_buffered(k,floor(3*partition_amount_mdct/4-i));
-     else
-         y_input_sig_buffered(k,i)=input_sig_buffered(k,floor(i-partition_amount_mdct/4))-input_sig_buffered(k,floor(3*partition_amount_mdct/4-i));
-     end
- end
- end
- 
-% for k=1:partition_amount_mdct
-% for i=0:N_blocksize_mdct-1
-%     if(i<floor(N_blocksize_mdct/2)+1)
-%         y_input_sig_buffered(i+1,k)=-input_sig_buffered(floor(i+3*N_blocksize_mdct/2)+1,k)-input_sig_buffered(floor(3*N_blocksize_mdct/2-1-i)+1,k);
-%     else
-%         y_input_sig_buffered(i+1,k)=input_sig_buffered(floor(i-N_blocksize_mdct/2)+1,k)-input_sig_buffered(floor(3*N_blocksize_mdct/2-1-i)+1,k); 
-%     end
-%     end
-% end
-
-%X[K]
-input_sig_buffered_mdct=dct(y_input_sig_buffered,[],1,'Type',4);
-
-for i=1:length(y_input_sig_buffered(1,:))
-    thresholded_partition=input_sig_buffered_mdct(:,i);
-    sorted_input_sig_mdct=sort(abs(thresholded_partition));
-    threshold_mdct=sorted_input_sig_mdct(ceil(compression_amount));
-    thresholded_partition(abs(thresholded_partition) < threshold_mdct)=0;
-    input_sig_buffered_mdct(:,i)=thresholded_partition;
-end
-
-% IDCT of X[K]
-Beta=idct(input_sig_buffered_mdct,[],1,'Type',4); 
-
-alpha=zeros(N2_blocksize_mdct,length(input_sig_buffered(1,:)));
-
-for k=1:length(alpha(:,1))
-
-for n=0:floor(length(input_sig_buffered(1,:))/4-1)
-    alpha(k,n+1)=Beta(k,(n+1)+floor(length(input_sig_buffered(1,:))/4));
-end
-
-%!!!
-for n=(floor(length(input_sig_buffered(1,:))/4):(floor(3*length(input_sig_buffered(1,:))/4)-1))
-    alpha(k,n+1)=(-1)*Beta(k,ceil(3*length(input_sig_buffered(1,:))/4)-(n+1));
-end
-
-for n=(floor(3*length(input_sig_buffered(1,:))/4)):(floor(length(input_sig_buffered(1,:)))-1)
-    alpha(k,n+1)=-1*Beta(k,-1*floor(3*length(input_sig_buffered(1,:))/4)+(n+1));
-end
-
-end
-
-% delay operation
-xr=zeros(length(alpha(:,1)),ceil(length(alpha(1,:))/2));
-
-xr_down=[zeros(1,251);xr];
-xr_up=[xr;zeros(1,251)];
-xr_after=zeros(length(alpha(:,1))+1,ceil(length(alpha(1,:))/2));
-
-for n=1:251
-    xr_after
-end
-
-xr_after=xr_after(:);
-
-
-%% 
-for i=0:length(a)/2-1
-if(i<floor(length(a)/4))
-b(i+1)=-a(floor(i+3*length(a)/4)+1)-a(floor(3*length(a)/4-1-(i))+1);
-else
-b(i+1)=a(floor(i-length(a)/4)+1)-a(floor(3*length(a)/4-1-(i))+1);
-end
-end
-
-
-
-
-% input_sig_buffered_mdct=dct(input_sig_buffered,[],1,'Type',4); % take dct of each buffered partition
-
-% for i=1:partition_amount_dct
-%     thresholded_partition=input_sig_buffered_mdct(:,i);
-%     sorted_input_sig_dct=sort(abs(thresholded_partition));
-%     threshold_dct=sorted_input_sig_dct(ceil(compression_amount));
-%     thresholded_partition(abs(thresholded_partition) < threshold_dct)=0;
-%     input_sig_buffered_mdct(:,i)=thresholded_partition;
-% end
+decoded_signal_4=udecode(encoded_signal_4,4,max(input_sig));
+sample_axis=1:length(input_sig);
+%%plot(u,recorded_double);
+figure
+ax1 = subplot(2,1,1);
+stem(ax1,sample_axis,decoded_signal_4);
+hold on
+stem(ax1,sample_axis,input_sig);
+title(ax1,'Original Signal and Decoded Signal for 4 bit quantization');
+legend(ax1,'Original Signal','Decoded Signal');
+error_signal_4=input_sig-decoded_signal_4;
+error_signal_power_4=error_signal_4.*error_signal_4;
+ax2=subplot(2,1,2);
+stem(ax2,sample_axis,error_signal_4);
+title(ax2,'Error Signal');
+min_error_signal_4=min(error_signal_4);
+max_error_signal_4=max(error_signal_4);
+mean_error_signal_4=mean(abs(error_signal_4));

@@ -1,5 +1,6 @@
 %phase 2-3
-input_sig=input_sig(10000000:10000300);
+t=0:0.01:3;
+input_sig=10*sin(2*pi*2.*t);
 
 
 
@@ -26,7 +27,7 @@ stem(ax2,sample_axis,error_signal_8);
 title(ax2,'Error Signal');
 min_error_signal_8=min(error_signal_8);
 max_error_signal_8=max(error_signal_8);
-mean_error_signal_8=mean(error_signal_power_8);
+mean_error_signal_8=mean(abs(error_signal_8));
 
 %% 6-bit quantization
 
@@ -51,7 +52,7 @@ stem(ax2,sample_axis,error_signal_6);
 title(ax2,'Error Signal');
 min_error_signal_6=min(error_signal_6);
 max_error_signal_6=max(error_signal_6);
-mean_error_signal_6=mean(error_signal_power_6);
+mean_error_signal_6=mean(abs(error_signal_6));
 %% 4-bit quantization
 
 encoded_signal_4=uencode(input_sig,4,max(input_sig));
@@ -75,4 +76,4 @@ stem(ax2,sample_axis,error_signal_4);
 title(ax2,'Error Signal');
 min_error_signal_4=min(error_signal_4);
 max_error_signal_4=max(error_signal_4);
-mean_error_signal_4=mean(error_signal_power_4);
+mean_error_signal_4=mean(abs(error_signal_4));

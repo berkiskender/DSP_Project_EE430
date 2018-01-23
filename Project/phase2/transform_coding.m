@@ -262,7 +262,7 @@ spectrogram_group9(input_sig, fs_generated, length(input_sig)/fs_generated);
 %corresponding threshold automatically for each input audio signal
 
 %Listen, comment on quality, plot spectrogram of input and output, compute error signal, average error 
-partition_amount_dft=500;
+partition_amount_dft=1500;
 
 % Sorting coeffs with respect to absolute values
 % sorted_input_sig_fft=sort(abs(fft(input_sig)));
@@ -274,7 +274,7 @@ partition_amount_dft=500;
 N_blocksize=floor(length(input_sig)/partition_amount_dft); % block size to be used in DFT
 
 % Determine the compression rate from here **************
-compression_amount=7000*N_blocksize/10000;
+compression_amount=9500*N_blocksize/10000;
 
 input_sig_buffered=buffer(input_sig ,N_blocksize); % Partition the signal
 
@@ -347,11 +347,11 @@ spectrogram_group9(input_sig_thresholded, fs_generated, length(input_sig)/fs_gen
 %% DCT
 
 %Listen, comment on quality, plot spectrogram of input and output, compute error signal, average error 
-partition_amount_dct=500;
+partition_amount_dct=1500;
 
 % Using DCT (Partition the input signal and apply quantization to frequency domain coefficients)
 N_blocksize_dct=floor(length(input_sig)/partition_amount_dct); % block size to be used in DCT
-compression_amount=7000*N_blocksize_dct/10000;
+compression_amount=9500*N_blocksize_dct/10000;
 % dct
 input_sig_buffered=buffer(input_sig ,N_blocksize_dct); % Partition the signal
 % audioread
@@ -412,7 +412,7 @@ title(str);
 % partition input signal into overlapping blocks of 50%
 %Listen, comment on quality, plot spectrogram of input and output, compute error signal, average error 
 
-partition_amount_mdct=40; %notice that it is 2 times the required block number for previous cases
+partition_amount_mdct=500; %notice that it is 2 times the required block number for previous cases
 
 
 % Using MDCT (Partition the input signal and apply quantization to frequency domain coefficients)
@@ -528,91 +528,4 @@ title(str);
 
 
 
-%% MDCT 2nd trial
-input_sig_T=input_sig';
-[len,num]=size(input_sig_T);
-
-% MDCT works for lengths on the order of 4
-if (rem(len,4)~=0)
-   fprintf('Erroneous length'); 
-end
-
-N=len; % Window length
-M=N/2; % number of coefficients
-N4=N/4;
-Nsqrt=sqrt(N);
-
-% Calculation of yn, a matrix for rotation is used. 
-rot=zeros(len,num);
-
-% Shifting the signal
-t=(0:(N4-1)).';
-rot(t+1,:) = -1*input_sig_T(t+3*N4+1,:);
-t=(N4:(N-1)).';
-rot(t+1,:) =  input_sig_T(t-N4+1,:);
-
-t = (0:(N4-1)).';
-w = diag(sparse(exp(-j*2*pi*(t+1/8)/N)));
-
-t = (0:(N4-1)).';
-c =(rot(2*t+1,:)-rot(N-1-2*t+1,:))-j*(rot(M+2*t+1,:)-rot(M-1-2*t+1,:));
-
-c = 0.5*w*c;
-clear rot;
-
-c = fft(c,N4);
-
-c = (2/Nsqrt)*w*c;
-
-t = (0:(N4-1)).';
-
-y=zeros(len,num);
-
-y(2*t+1,:)     =  real(c(t+1,:));
-y(M-1-2*t+1,:) = -imag(c(t+1,:));
-
-%% MDCT 3rd trial
-
-%Listen, comment on quality, plot spectrogram of input and output, compute error signal, average error 
-partition_amount_mdct=500;
-
-% Using DCT (Partition the input signal and apply quantization to frequency domain coefficients)
-N_blocksize_mdct=floor(length(input_sig)/partition_amount_mdct); % block size to be used in DCT
-compression_amount=8000*(N_blocksize_mdct/2)/10000;
-% dct
-input_sig_buffered=buffer(input_sig ,N_blocksize_mdct); % Partition the signal
-
-input_sig_buffered_mdct=zeros(length(input_sig_buffered(:,1))/2,length(input_sig_buffered(1,:)));
-% input_sig_buffered_mdct=input_sig_buffered_mdct';
-input_sig_buffered_T=input_sig_buffered';
-
-for k=1:length(input_sig_buffered(1,:))
-input_sig_buffered_mdct(:,k)=mdct4(input_sig_buffered(:,k)); % take mdct of each buffered partition
-end
-
-for i=1:partition_amount_mdct
-    thresholded_partition=input_sig_buffered_mdct(:,i);
-    sorted_input_sig_mdct=sort(abs(thresholded_partition));
-    threshold_mdct=sorted_input_sig_mdct(ceil(compression_amount));
-    thresholded_partition(abs(thresholded_partition) < threshold_mdct)=0;
-    input_sig_buffered_mdct(:,i)=thresholded_partition;
-end
-% input_sig_buffered_fft(abs(input_sig_buffered_fft) < threshold)=0; % make values zero if they have abs value smaller than threshold
-
-input_sig_buffered_thresholded=imdct4(input_sig_buffered_mdct);
-input_sig_thresholded=input_sig_buffered_thresholded(:); % obtain a vector from buffered & thresholded matrix
-
-% % Error signal computation
-% input_sig_thresholded_mdct=input_sig_thresholded(1:length(input_sig)/2);
-% err_dct_comp=input_sig-input_sig_thresholded_mdct';
-% 
-% % Average power computation
-% err_avg_pwr=err_dct_comp.^2;
-% err_avg_pwr=mean(err_avg_pwr);
-% err_tot_pwr=sum(err_dct_comp.^2);
-% input_sig_avg_pwr=mean(input_sig.^2);
-% 
-% input_sig_thresholded_mdct=input_sig_thresholded_mdct';
-% avg_pwr_input_sig_thresholded_mdct=mean(input_sig_thresholded_mdct.^2);
-% numzeros_mdct=nnz(~real(input_sig_buffered_mdct));
 

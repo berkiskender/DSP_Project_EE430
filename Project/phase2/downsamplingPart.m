@@ -260,6 +260,7 @@ spectrogram_group9(input_sig, fs_generated, length(input_sig)/fs_generated);
 downsampled2=downsample(input_sig, 2);
 downsampled3=downsample(input_sig, 3);
 downsampled6=downsample(input_sig, 6);
+downsampled12=downsample(input_sig, 12);
 
 fprintf('\nSpectrogram of the signal downsampled by 2:\n')
 spectrogram_group9(downsampled2, fs_generated, length(downsampled2)/fs_generated);
